@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			.container{width: 500px;margin: 0 auto;}
+			table{width: 500px;}
+			table tr{margin-top: 10px;background-color: #ccc;}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<canvas id="chart-doughnut" width="280" height="280"></canvas>
+			<table id="vote_table" border="0" cellspacing="" cellpadding="">
+				
+				
+			</table>
+			<a href="index.html" style="display: block;text-align: center;">返回首页</a>
+		</div>
+		<!--JQuery 3.5.1-->
+		<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+		<!-- Chart -->
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+		<script type="text/javascript">
+			$(function(){
+				$.ajax({
+					type: 'get',
+					url: 'http://localhost/VoteServlet.action?method=toGetListData&'+new Date(),
+					success: function(msg){
+						let data=JSON.parse(msg);
+						
+						let chart_num_data=new Array();
+						let chart_candidate_data=new Array();
+						let chart_color_data=new Array();
+						
+						
+						
+						
+						//列表
+						let i=0;
+						for(let vote of data.vote_list){
+							
+							
+							chart_color_data[i]='rgba('+(Math.random()*250+1)+','+(Math.random()*250+1)+','+(Math.random()*250+1)+',1)';
+							
+							let temp_tr=document.createElement('tr');
+							let temp_td=document.createElement('td');
+							
+							let temp_p_1=document.createElement('p');
+							chart_candidate_data[i]=vote.candidate;
+							temp_p_1.innerHTML='候选人：'+vote.candidate;
+							let temp_p_2=document.createElement('p');
+							temp_p_2.innerHTML='投票率：';
+							let temp_progressbar=document.createElement('progress');
+							temp_progressbar.max='100';
+							chart_num_data[i++]=vote.poll;
+							temp_progressbar.value=''+Math.round(vote.poll*100/data.poll_total);
+							temp_p_2.appendChild(temp_progressbar);
+							
+							let temp_p_3=document.createElement('p');
+							temp_p_3.innerHTML='数字显示：'+vote.poll+'/'+data.poll_total;
+							
+							
+							
+							temp_td.appendChild(temp_p_1);
+							temp_td.appendChild(temp_p_2);
+							temp_td.appendChild(temp_p_3);
+							
+							temp_tr.appendChild(temp_td);
+							
+							$('#vote_table').append(temp_tr);
+							
+						}
+						
+						//chart
+							new Chart($('#chart-doughnut'),{
+							type: 'doughnut',
+							data: {
+								labels: chart_candidate_data,
+								datasets: [{
+									data: chart_num_data,
+									backgroundColor: chart_color_data
+								}]
+							},
+							options: {
+								responsive: true
+							}
+						});
+						
+					}
+				});
+				});
+		</script>
+	</body>
+</html>

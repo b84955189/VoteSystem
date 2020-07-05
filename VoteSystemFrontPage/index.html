@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			form{width: 300px;margin: 0 auto;text-align: center;}
+			table{margin: 0 auto;}
+			table tr{margin-top: 10px;background-color: #ccc;}
+		</style>
+	</head>
+	<body>
+	<form id="vote_form">
+		<table id="vote_table" border="0" cellspacing="" cellpadding="">
+			<caption>你觉得谁最帅？</caption>
+		</table>
+		<input type="button" id="vote_button" value="投票" />
+		<p><a href="statistics.html">查看统计结果</a></p>
+	</form>	
+	
+	<!--JQuery 3.5.1-->
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+	<script>
+		$(function(){
+			$.ajax({
+				type: 'get',
+				url: '/VoteServlet.action?method=toGetListData&'+new Date().getTime(),
+				success: function(msg){
+					let data=JSON.parse(msg);
+					for(let vote of data.vote_list){
+						let temp_tr=document.createElement('tr');
+						let temp_td_1=document.createElement('td');
+						temp_td_1.innerHTML=vote.candidate;
+						
+						let temp_td_2=document.createElement('td');
+						let temp_input_radio=document.createElement('input');
+						temp_input_radio.type='radio';
+						temp_input_radio.name=data.radio_name;
+						temp_input_radio.value=vote.id;
+						temp_td_2.appendChild(temp_input_radio);
+						temp_tr.appendChild(temp_td_1);
+						temp_tr.appendChild(temp_td_2);
+						
+						$('#vote_table').append(temp_tr);
+						
+					}
+					
+					
+					
+				}
+			});
+			$('#vote_button').on('click',function(){
+				$.ajax({
+					type: 'get',
+					url: 'http://localhost/VoteServlet.action?method=toUpdate&'+new Date(),
+					data: $('#vote_form').serialize(),
+					timeout: 3000,
+					success: function(msg){
+						console.log(msg);
+						switch(msg){
+							case 'success':{window.location.href='statistics.html';};break;
+							case 'fail':{alert('请选择候选人！');};break;
+							default:alert('网络错误！');break;
+						}
+					},
+					error: function(){
+						alert('请选择候选人！');
+					}
+				});
+			});
+		});
+	</script>
+	</body>
+</html>
